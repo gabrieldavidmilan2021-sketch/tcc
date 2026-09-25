@@ -56,3 +56,17 @@ body {
 .controles { position: absolute; z-index: 2; bottom: 8px; width: 100%; margin: 0; text-align: center; font-size: 11px; color: #b7c0c8; }
 
 @media (max-width: 650px) { .corredor { inset: 125px 5vw 72px; grid-template-columns: repeat(2, 1fr); gap: 14px; overflow-y: auto; padding-bottom: 50px; } .porta { min-height: 90px; } .zero { bottom: 30px; } }
+
+.mobile-controls { display: none; }
+.mobile-controls button { width: 48px; height: 48px; border: 2px solid var(--neon); border-radius: 10px; background: rgba(5, 12, 20, .82); color: var(--neon); font: bold 24px "Courier New", monospace; box-shadow: 3px 3px #000; touch-action: none; user-select: none; -webkit-user-select: none; }
+.mobile-controls button:active { background: rgba(55, 255, 144, .36); transform: scale(.94); }
+
+@media (max-width: 650px), (pointer: coarse) {
+  .mobile-controls { position: absolute; z-index: 6; left: 12px; bottom: 26px; display: grid; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(2, 48px); gap: 4px; touch-action: none; }
+  .mobile-controls [data-move="w"] { grid-column: 2; grid-row: 1; }
+  .mobile-controls [data-move="a"] { grid-column: 1; grid-row: 2; }
+  .mobile-controls [data-move="s"] { grid-column: 2; grid-row: 2; }
+  .mobile-controls [data-move="d"] { grid-column: 3; grid-row: 2; }
+  .controles { right: 10px; left: auto; bottom: 12px; width: 45%; transform: none; font-size: 9px; text-align: right; }
+  .aviso { bottom: 135px; font-size: 11px; }
+}

@@ -20,7 +20,9 @@ for (const directory of ['css', 'js', 'img', 'teste', 'testes']) {
 app.get('/', (req, res) => res.sendFile(path.join(siteRoot, 'index.html')));
 app.get('/:page.html', (req, res, next) => {
   if (!/^[a-zA-Z0-9_-]+$/.test(req.params.page)) return next();
-  res.sendFile(path.join(siteRoot, req.params.page + '.html'), (err) => { if (err) next(); });
+  res.sendFile(path.join(siteRoot, req.params.page + '.html'), (err) => {
+    if (err) next();
+  });
 });
 
 function generateToken(username) {
@@ -32,9 +34,8 @@ function authMiddleware(req, res, next) {
   if (!auth) return res.status(401).json({ success: false, message: 'Sem token' });
   const parts = auth.split(' ');
   if (parts.length !== 2) return res.status(401).json({ success: false, message: 'Token inválido' });
-  const token = parts[1];
   try {
-    const payload = jwt.verify(token, JWT_SECRET);
+    const payload = jwt.verify(parts[1], JWT_SECRET);
     req.user = payload.username;
     next();
   } catch (err) {
@@ -42,14 +43,18 @@ function authMiddleware(req, res, next) {
   }
 }
 
+app.get('/health', (req, res) => res.json({ success: true }));
+
 app.post('/api/register', async (req, res) => {
-  const { username, password } = req.body || {};
-  if (!username || !password) return res.status(400).json({ success: false, message: 'Informe usuário e senha' });
+  const username = (req.body?.username || '').trim().toLowerCase();
+  const password = (req.body?.password || '').trim();
+  if (!username || !password) {
+    return res.status(400).json({ success: false, message: 'Informe usuário e senha' });
+  }
   try {
-    const existing = db.getUserByUsername(username);
-    if (existing) return res.status(400).json({ success: false, message: 'Usuário já existe' });
     const hash = await bcrypt.hash(password, 10);
-    db.createUser(username, hash);
+    const created = await db.createUser(username, hash);
+    if (!created) return res.status(400).json({ success: false, message: 'Usuário já existe' });
     const token = generateToken(username);
     return res.json({ success: true, token, username, faseAtual: 1, pontos: 0 });
   } catch (err) {
@@ -59,43 +64,57 @@ app.post('/api/register', async (req, res) => {
 });
 
 app.post('/api/login', async (req, res) => {
-  const { username, password } = req.body || {};
-  if (!username || !password) return res.status(400).json({ success: false, message: 'Informe usuário e senha' });
+  const username = (req.body?.username || '').trim().toLowerCase();
+  const password = (req.body?.password || '').trim();
+  if (!username || !password) {
+    return res.status(400).json({ success: false, message: 'Informe usuário e senha' });
+  }
   try {
-    const user = db.getUserByUsername(username);
+    const user = await db.getUserByUsername(username);
     if (!user) return res.status(400).json({ success: false, message: 'Usuário não encontrado' });
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ success: false, message: 'Senha incorreta' });
     const token = generateToken(username);
-    return res.json({ success: true, token, username: user.username, faseAtual: user.faseAtual, pontos: user.pontos });
+    return res.json({
+      success: true,
+      token,
+      username: user.username,
+      faseAtual: user.faseAtual,
+      pontos: user.pontos
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: 'Erro ao fazer login' });
   }
 });
 
-app.get('/api/progress', authMiddleware, (req, res) => {
+app.get('/api/progress', authMiddleware, async (req, res) => {
   try {
-    const user = db.getUserByUsername(req.user);
+    const user = await db.getUserByUsername(req.user);
     if (!user) return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
-    return res.json({ success: true, faseAtual: user.faseAtual, pontos: user.pontos, username: user.username });
+    return res.json({
+      success: true,
+      faseAtual: user.faseAtual,
+      pontos: user.pontos,
+      username: user.username
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: 'Erro ao obter progresso' });
   }
 });
 
-app.post('/api/save', authMiddleware, (req, res) => {
+app.post('/api/save', authMiddleware, async (req, res) => {
   const { faseAtual, pontos } = req.body || {};
   if (typeof faseAtual !== 'number' && typeof pontos !== 'number') {
     return res.status(400).json({ success: false, message: 'Envie faseAtual e pontos como números' });
   }
   try {
-    const user = db.getUserByUsername(req.user);
+    const user = await db.getUserByUsername(req.user);
     if (!user) return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
     const newFase = typeof faseAtual === 'number' ? faseAtual : user.faseAtual;
     const newPontos = typeof pontos === 'number' ? pontos : user.pontos;
-    db.updateProgress(req.user, newFase, newPontos);
+    await db.updateProgress(req.user, newFase, newPontos);
     return res.json({ success: true, faseAtual: newFase, pontos: newPontos });
   } catch (err) {
     console.error(err);
@@ -103,6 +122,7 @@ app.post('/api/save', authMiddleware, (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`TCC server rodando em http://localhost:${PORT}`);
+db.init().catch((err) => {
+  console.error('PostgreSQL indisponível; cadastro e progresso não poderão ser salvos:', err);
 });
+app.listen(PORT, () => console.log('TCC server rodando na porta ' + PORT));

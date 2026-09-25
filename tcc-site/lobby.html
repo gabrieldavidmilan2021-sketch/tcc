@@ -19,7 +19,13 @@
     <img id="zero" class="zero" src="img/zero.png" alt="Zero">
     <p id="aviso" class="aviso" role="status" aria-live="polite"></p>
     
-    <p class="controles">[W][A][S][D] MOVER &nbsp; • &nbsp; [F] ENTRAR NA PORTA</p>
+    <div class="mobile-controls" role="group" aria-label="Controles para mover o personagem">
+      <button type="button" data-move="w" aria-label="Andar para cima">▲</button>
+      <button type="button" data-move="a" aria-label="Andar para a esquerda">◀</button>
+      <button type="button" data-move="s" aria-label="Andar para baixo">▼</button>
+      <button type="button" data-move="d" aria-label="Andar para a direita">▶</button>
+    </div>
+    <p class="controles">W A S D ou setas para mover &nbsp; • &nbsp; F para entrar na porta</p>
   </main>
 
   <script src="js/save.js"></script>

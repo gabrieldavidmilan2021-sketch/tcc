@@ -190,13 +190,16 @@ async function getActivePoints() {
 async function getActivePhase() {
   const user = getCurrentUser();
   const token = getToken();
+  const localData = user ? getUserDataLocal(user) : null;
+  const localPhase = Math.max(1, parseInt(localData && localData.faseAtual, 10) || 1);
   if (user && token) {
     const progress = await tryFetch('/api/progress', { headers: { Authorization: 'Bearer ' + token } });
-    if (progress.ok && progress.json && progress.json.success) return parseInt(progress.json.faseAtual || 1);
+    if (progress.ok && progress.json && progress.json.success) {
+      return Math.max(localPhase, parseInt(progress.json.faseAtual || 1, 10));
+    }
   }
-  if (!user) return parseInt(localStorage.getItem('faseAtual') || '1');
-  const data = getUserDataLocal(user);
-  return data ? parseInt(data.faseAtual || 1) : 1;
+  if (!user) return parseInt(localStorage.getItem('faseAtual') || '1', 10) || 1;
+  return localPhase;
 }
 
 async function updateActivePhase(fase) {
@@ -214,33 +217,36 @@ async function updateActivePhase(fase) {
   if (token) {
     const progress = await tryFetch('/api/progress', { headers: { Authorization: 'Bearer ' + token } });
     if (progress.ok && progress.json && progress.json.success) {
-      await tryFetch('/api/save', {
+      const saved = await tryFetch('/api/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
         body: JSON.stringify({ faseAtual: fase, pontos: progress.json.pontos })
       });
-      return;
+      if (saved.ok && saved.json && saved.json.success) {
+        const local = getUserDataLocal(user) || { faseAtual: 1, pontos: 0 };
+        local.faseAtual = fase;
+        local.pontos = Math.max(0, parseInt(progress.json.pontos, 10) || 0);
+        saveUserDataLocal(user, local);
+        return;
+      }
     }
   }
-  const data = getUserDataLocal(user);
-  if (!data) return;
-  data.faseAtual = fase;
+  const data = getUserDataLocal(user) || { faseAtual: 1, pontos: 0 };
+  data.faseAtual = Math.max(parseInt(data.faseAtual, 10) || 1, fase);
   saveUserDataLocal(user, data);
 }
 
-function resetActiveSave() {
+async function resetActiveSave() {
   const user = getCurrentUser();
   if (user) {
-    const data = getUserDataLocal(user);
-    if (data) {
-      data.faseAtual = 1;
-      data.pontos = 0;
-      saveUserDataLocal(user, data);
-    }
+    const data = getUserDataLocal(user) || { faseAtual: 1, pontos: 0 };
+    data.faseAtual = 1;
+    data.pontos = 0;
+    saveUserDataLocal(user, data);
     // try server but don't await
     const token = getToken();
     if (token) {
-      tryFetch('/api/save', {
+      await tryFetch('/api/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
         body: JSON.stringify({ faseAtual: 1, pontos: 0 })

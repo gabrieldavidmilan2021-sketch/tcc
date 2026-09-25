@@ -1,21 +1,13 @@
 # TCC Server
 
-Backend simples para o projeto TCC.
+Backend Node.js com cadastro, login e progresso em PostgreSQL.
 
-Instalação e execução:
+## Render
 
-```bash
-cd server
-npm install
-npm start
-```
+Root Directory: tcc-site/server
+Build Command: npm install
+Start Command: npm start
 
-O servidor roda por padrão em `http://localhost:3000`.
+Crie um PostgreSQL e configure DATABASE_URL no Web Service com a Internal Database URL. Se o provedor exigir TLS, configure DATABASE_SSL=true. Configure JWT_SECRET com um segredo aleatório longo.
 
-Rotas principais:
-- `POST /api/register` { username, password }
-- `POST /api/login` { username, password }
-- `GET /api/progress` (Authorization: Bearer <token>)
-- `POST /api/save` { faseAtual, pontos } (Authorization header)
-
-Observação: em produção troque `JWT_SECRET` e proteja HTTPS.
+O PostgreSQL gratuito do Render expira após 30 dias. Para persistência contínua, escolha um plano que não expire ou outro provedor PostgreSQL.
