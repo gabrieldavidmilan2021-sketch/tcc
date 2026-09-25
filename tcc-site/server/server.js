@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const path = require('path');
 const db = require('./db');
 
 const app = express();
@@ -11,6 +12,16 @@ const JWT_SECRET = process.env.JWT_SECRET || 'troque_esta_chave_secret_para_prod
 
 app.use(cors());
 app.use(bodyParser.json());
+
+const siteRoot = path.join(__dirname, '..');
+for (const directory of ['css', 'js', 'img', 'teste', 'testes']) {
+  app.use('/' + directory, express.static(path.join(siteRoot, directory)));
+}
+app.get('/', (req, res) => res.sendFile(path.join(siteRoot, 'index.html')));
+app.get('/:page.html', (req, res, next) => {
+  if (!/^[a-zA-Z0-9_-]+$/.test(req.params.page)) return next();
+  res.sendFile(path.join(siteRoot, req.params.page + '.html'), (err) => { if (err) next(); });
+});
 
 function generateToken(username) {
   return jwt.sign({ username }, JWT_SECRET, { expiresIn: '30d' });

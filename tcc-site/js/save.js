@@ -1,13 +1,13 @@
 // ===============================
 // SISTEMA GLOBAL DE SAVE COM SUPORTE A BACKEND
-// - tenta usar API em http://localhost:3000
+// - usa a API do mesmo serviço em que o site está publicado
 // - se não disponível, mantém fallback em localStorage
 // ===============================
 
 const SAVE_PREFIX = "tcc_user_";
 const CURRENT_USER_KEY = "tcc_currentUser";
 const TOKEN_KEY = "tcc_token";
-const SERVER_URL = window.SERVER_URL || "http://localhost:3000";
+const SERVER_URL = window.SERVER_URL || window.location.origin;
 
 function getSaveKey(username) {
   return SAVE_PREFIX + username.toLowerCase();
