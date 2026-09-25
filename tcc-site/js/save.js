@@ -89,17 +89,14 @@ async function registerUser(username, password) {
     return { success: true };
   }
 
-  // Fallback local
-  if (getUserDataLocal(username)) return { success: false, message: 'Usuário já existe. Faça login.' };
-  saveUserDataLocal(username, { password, faseAtual: 1, pontos: 0 });
-  setCurrentUser(username);
-  return { success: true };
+  if (res.error) return { success: false, message: 'Nao foi possivel conectar ao servidor. Verifique a internet e tente novamente.' };
+  return { success: false, message: (res.json && res.json.message) || 'Nao foi possivel criar a conta. Tente novamente.' };
 }
 
 async function loginUser(username, password) {
-  username = (username || "").trim();
+  username = (username || "").trim().toLowerCase();
   password = (password || "").trim();
-  if (!username || !password) return { success: false, message: "Digite usuário e senha." };
+  if (!username || !password) return { success: false, message: "Digite usuario e senha." };
 
   const res = await tryFetch('/api/login', {
     method: 'POST',
@@ -113,14 +110,35 @@ async function loginUser(username, password) {
     return { success: true, data: { faseAtual: res.json.faseAtual, pontos: res.json.pontos } };
   }
 
-  // Fallback local
-  const data = getUserDataLocal(username);
-  if (!data) return { success: false, message: 'Usuário não encontrado. Cadastre-se.' };
-  if (data.password !== password) return { success: false, message: 'Senha incorreta.' };
-  setCurrentUser(username);
-  return { success: true, data };
-}
+  if (res.error) {
+    return { success: false, message: 'Nao foi possivel conectar ao servidor. Verifique a internet e tente novamente.' };
+  }
 
+  // Migra contas antigas que existiam somente no navegador para o banco compartilhado.
+  const mensagem = String((res.json && res.json.message) || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  if (mensagem.includes('usuario nao encontrado')) {
+    const local = getUserDataLocal(username);
+    if (local && local.password === password) {
+      const criacao = await tryFetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      if (criacao.ok && criacao.json && criacao.json.success) {
+        setToken(criacao.json.token);
+        setCurrentUser(criacao.json.username);
+        await tryFetch('/api/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + criacao.json.token },
+          body: JSON.stringify({ faseAtual: Math.max(1, parseInt(local.faseAtual, 10) || 1), pontos: Math.max(0, parseInt(local.pontos, 10) || 0) })
+        });
+        return { success: true, data: { faseAtual: local.faseAtual || 1, pontos: local.pontos || 0 } };
+      }
+    }
+  }
+
+  return { success: false, message: (res.json && res.json.message) || 'Usuario ou senha incorretos.' };
+}
 function logoutUser() {
   setCurrentUser(null);
   setToken(null);
