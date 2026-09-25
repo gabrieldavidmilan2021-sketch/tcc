@@ -1,0 +1,7 @@
+git add .
+git commit -m "Atualiza projeto"
+git push origin main
+
+cd D:\tcc-site
+git add .
+git commit -m "Atualiza sistema de cadastro e progresso"

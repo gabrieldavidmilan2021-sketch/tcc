@@ -1,0 +1,58 @@
+:root {
+  /* Troque "none" por: url("../img/seu-fundo.png") para usar sua imagem de fundo. */
+  --lobby-background: none;
+  --neon: #37ff90;
+  --pink: #ff3cac;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #05070c;
+  color: #eafff3;
+  font-family: "Courier New", monospace;
+}
+
+.lobby {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background-color: #080d16;
+  background-image: linear-gradient(rgba(3, 7, 12, .58), rgba(3, 7, 12, .78)), var(--lobby-background);
+  background-size: cover;
+  background-position: center;
+}
+
+.lobby::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .28;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,.1) 3px 4px);
+}
+
+.lobby__header { position: relative; z-index: 2; padding: clamp(18px, 3vw, 36px); text-align: center; text-shadow: 3px 3px #000; }
+.lobby__header h1 { margin: 4px 0; color: var(--neon); font-size: clamp(24px, 4vw, 46px); letter-spacing: .14em; }
+.lobby__eyebrow, .lobby__status { margin: 5px; font-size: clamp(11px, 1.7vw, 15px); }
+.lobby__status { color: #ffd84a; }
+
+.corredor { position: absolute; z-index: 1; inset: 140px 7vw 74px; display: grid; grid-template-columns: repeat(5, minmax(80px, 1fr)); align-content: space-between; gap: 8vh clamp(12px, 3vw, 50px); }
+.porta { position: relative; min-height: 120px; align-self: center; border: 5px solid #111; border-bottom-width: 9px; background: linear-gradient(90deg, #252b36, #080a0d 18%, #343b47 50%, #080a0d 82%, #252b36); box-shadow: inset 0 0 0 3px #59606b, 6px 7px 0 #000; color: #fff; font: bold clamp(18px, 2.8vw, 32px) "Courier New", monospace; cursor: pointer; transition: transform .15s, filter .15s; }
+.porta::before { content: "FASE"; display: block; font-size: 11px; letter-spacing: .15em; color: #c8d0d7; }
+.porta::after { content: ""; position: absolute; right: 13px; top: 50%; width: 9px; height: 9px; border-radius: 50%; background: #fb3556; box-shadow: 0 0 8px #fb3556; }
+.porta.liberada { border-color: #238151; box-shadow: inset 0 0 0 3px #8fffc3, 0 0 18px rgba(55,255,144,.55), 6px 7px 0 #000; }
+.porta.liberada::after { background: var(--neon); box-shadow: 0 0 10px var(--neon); }
+.porta.liberada:hover, .porta.liberada:focus { transform: translateY(-5px); outline: none; }
+.porta.bloqueada { cursor: not-allowed; filter: grayscale(1) brightness(.55); }
+.porta.bloqueada span { font-size: 18px; }
+
+.zero { position: absolute; z-index: 3; left: 50%; bottom: 34px; width: clamp(46px, 6vw, 78px); transform: translateX(-50%); image-rendering: pixelated; filter: drop-shadow(0 0 8px rgba(55,255,144,.8)); transition: filter .15s; }
+.zero.andando { filter: drop-shadow(0 0 14px var(--pink)); }
+.aviso { position: absolute; z-index: 4; left: 50%; bottom: 110px; transform: translateX(-50%); max-width: 90vw; padding: 10px 14px; text-align: center; background: #060b12e8; border: 2px solid var(--neon); color: var(--neon); font-size: 13px; box-shadow: 4px 4px #000; }
+.controles { position: absolute; z-index: 2; bottom: 8px; width: 100%; margin: 0; text-align: center; font-size: 11px; color: #b7c0c8; }
+
+@media (max-width: 650px) { .corredor { inset: 125px 5vw 72px; grid-template-columns: repeat(2, 1fr); gap: 14px; overflow-y: auto; padding-bottom: 50px; } .porta { min-height: 90px; } .zero { bottom: 30px; } }

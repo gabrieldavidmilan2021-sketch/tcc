@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lobby - Missão Zero</title>
+  <link rel="stylesheet" href="css/lobby.css">
+</head>
+<body>
+  <main class="lobby" aria-label="Lobby das fases">
+    <header class="lobby__header">
+      <p class="lobby__eyebrow">MISSÃO ZERO</p>
+      <h1>HUB DE FASES</h1>
+      <p id="status" class="lobby__status">Carregando portas...</p>
+    </header>
+
+    <section id="corredor" class="corredor" aria-label="Portas das fases"></section>
+
+    <img id="zero" class="zero" src="img/zero.png" alt="Zero">
+    <p id="aviso" class="aviso" role="status" aria-live="polite"></p>
+    
+    <p class="controles">[W][A][S][D] MOVER &nbsp; • &nbsp; [F] ENTRAR NA PORTA</p>
+  </main>
+
+  <script src="js/save.js"></script>
+  <script src="js/lobby.js"></script>
+</body>
+</html>

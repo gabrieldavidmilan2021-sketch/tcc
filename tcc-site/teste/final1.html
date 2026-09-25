@@ -1,0 +1,49 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teste de fase · Monte o HTML</title>
+  <link rel="stylesheet" href="/teste/final1.css">
+</head>
+<body>
+  <section class="intro" id="intro">
+    <img src="../img/zero.png" alt="Zero, seu guia" class="zero-intro">
+    <div class="balao">
+      <small id="introEtapa">ZERO · GUIA DE HTML</small>
+      <p id="fala"></p>
+      <button id="continuar" type="button">CONTINUAR ▶</button>
+    </div>
+  </section>
+
+  <main id="jogo" class="jogo oculto">
+    <header class="topbar">
+      <div><small>MISSÃO HTML</small><h1>MONTE A ESTRUTURA</h1></div>
+      <div class="vidas"><span>CHANCES</span><div id="vidas"><b>♥</b><b>♥</b><b>♥</b></div></div>
+    </header>
+    <section class="arena" id="arena" aria-label="Mapa para coletar as tags HTML">
+      <div class="trilha"></div>
+      <div class="zona zona-inicio"><b>ENTRADA</b></div>
+      <div class="zona zona-painel"><b>PAINEL HTML</b><span>AS TAGS COLETADAS APARECEM AQUI</span></div>
+      <div class="personagem" id="personagem"><img src="../img/zero.png" alt="Zero"><span>ZERO</span></div>
+      <div class="aviso" id="aviso">CAMINHE ATÉ A PRÓXIMA TAG E APERTE F</div>
+    </section>
+    <section class="rodape">
+      <div class="missao"><small>PRÓXIMO ELEMENTO</small><h2 id="objetivo">&lt;html&gt;</h2><p id="dica">W A S D para mover · F para coletar</p></div>
+      <div class="codigo-area">
+        <div class="codigo-topo"><span>EDITOR HTML · CÓDIGO MONTADO</span><span id="contador">0 / 6</span></div>
+        <pre id="codigo"><span class="cursor">_</span></pre>
+      </div>
+      <div class="status" id="mensagem" aria-live="polite">Encontre a tag indicada no mapa.</div>
+    </section>
+  </main>
+
+  <div class="overlay" id="erroTela" role="dialog" aria-modal="true">
+    <div class="caixa erro"><b class="simbolo">!</b><h2>AINDA NÃO</h2><p id="textoErro"></p><button id="tentarNovamente" type="button">CONTINUAR</button></div>
+  </div>
+  <div class="overlay" id="vitoriaTela" role="dialog" aria-modal="true">
+    <div class="caixa vitoria"><b class="simbolo">★</b><h2>HTML MONTADO!</h2><p>Você encontrou cada elemento e organizou a estrutura da página.</p><pre id="codigoFinal"></pre><button id="proximaFase" type="button">CONTINUAR ▶</button></div>
+  </div>
+  <script src="/teste/final1.js"></script>
+</body>
+</html>
